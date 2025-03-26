@@ -18,7 +18,7 @@ const dev = {
     port: process.env.DEV_APP_PORT,
   },
   db: {
-    uri: process.env.MONGODB_URI,
+    uri: process.env.MONGODB_URL,
   },
 };
 
@@ -27,7 +27,7 @@ const pro = {
     port: process.env.PRO_APP_PORT,
   },
   db: {
-    uri: process.env.MONGODB_URI,
+    uri: process.env.MONGODB_URL,
   },
 };
 

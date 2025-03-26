@@ -22,10 +22,15 @@ const keyTokenSchema = new Schema(
       type: String,
       required: true
     },
-    refreshToken: {
+    refreshTokenUsed: {
       type: Array,
-      default: [],
+      default: [], // những refresh token đã sử dụng
     },
+
+    refreshToken: {
+      type: String,
+      required: true,
+    }
   },
   {
     collection: COLLECTION_NAME,
