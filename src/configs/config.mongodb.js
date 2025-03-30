@@ -2,17 +2,6 @@
 
 const e = require("express");
 
-// level 0
-// const config = {
-//     app: {
-//         port: 3000
-//     },
-//     db: {
-//         uri: process.env.MONGODB_URI,
-//     }
-// }
-
-// level 1
 const dev = {
   app: {
     port: process.env.DEV_APP_PORT,
