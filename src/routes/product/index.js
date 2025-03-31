@@ -12,6 +12,8 @@ router.get("/:product_id", asyncHandler(productController.findProduct));
 // Check authenticationV2 before all routes
 router.use(authenticationV2);
 
+router.patch("/:productId", asyncHandler(productController.updateProduct));
+
 router.post("/", asyncHandler(productController.createProduct));
 router.post("/publish/:id", asyncHandler(productController.publishProductByShop));
 router.post("/unpublish/:id", asyncHandler(productController.unPublishProductByShop));

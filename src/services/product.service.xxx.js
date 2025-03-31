@@ -9,9 +9,11 @@ const {
     unPublishProductByShop,
     searchProductByUser,
     findAllProducts,
-    findProduct
+    findProduct,
+    updateProductById
 } = require("../models/repositories/product.repo");
 const { find } = require("lodash");
+const { removeUndefineObject, updateNestedObjectParser } = require("../utils");
 
 // define the factory class to create product
 class ProductFactory {
@@ -31,9 +33,13 @@ class ProductFactory {
     }
 
     /* UPDATE PRODUCT */
-    static async updateProduct({ product_id, payload }) {
-
-    }
+    static async updateProduct(type, productId, payload) {
+        const productClass = ProductFactory.productRegistry[type];
+        if (!productClass) {
+            throw new BadRequestError(`Invalid product type ${type}`);
+        }
+        return new productClass(payload).updateProduct(productId);
+    } 
 
     /* PUT */
     static async publishProductByShop({ product_shop, product_id }) {
@@ -92,6 +98,11 @@ class Product {
     async createProduct( product_id ) {
         return await product.create({...this, _id: product_id})
     }
+
+    // Update product
+    async updateProduct(productId, bodyUpdate) {
+        return await updateProductById({productId, bodyUpdate, model: product})
+    }
 }
 
 // Define sub-class for different product types Clothing
@@ -108,6 +119,22 @@ class Clothing extends Product {
         }
 
         return newProduct;
+    }
+
+    async updateProduct(productId) {
+        const updateNest = updateNestedObjectParser(this);
+        const objectParams = removeUndefineObject(updateNest);
+        if (objectParams.product_attributes) {
+            // update child
+            await updateProductById({
+                productId, 
+                bodyUpdate: updateNestedObjectParser(objectParams.product_attributes), 
+                model: clothing
+            })
+        }
+
+        const updateProduct = await super.updateProduct(productId, updateNestedObjectParser(objectParams));
+        return updateProduct;
     }
 }
 
