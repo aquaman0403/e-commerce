@@ -2,6 +2,7 @@
 
 const { BadRequestError, NotFoundError } = require('../core/error.response')
 const {discount} = require('../models/discount.model')
+const { Types } = require('mongoose')
 const { convertToObjectIdMongodb } = require('../utils')
 const { findAllProducts } = require('../models/repositories/product.repo')
 const { 
@@ -126,6 +127,8 @@ class DiscountService {
                 select: ['product_name'],
             })
         }
+
+        return products
     }
 
     static async getAllDiscountCodesByShop({
