@@ -21,50 +21,72 @@ class CartService {
         const query = {
             cart_userId: userId,
             cart_status: 'active'
-        }
+        };
         const updateOrInsert = {
-            $addToSet: {
-                cart_products: product,
+            $setOnInsert: { // Chỉ set khi tạo mới
+                cart_products: [product]
             }
-        }, options = { upsert: true, new: true}
+        };
+        const options = { upsert: true, new: true };
 
-        return await cart.findOneAndUpdate(query, updateOrInsert, options)
+        return await cart.findOneAndUpdate(query, updateOrInsert, options);
     }
 
     static async updateUserCartQuantity({ userId, product }) {
-        const { productId, quantity } = product
-        const query = {
+        const { productId, quantity } = product;
+        
+        // Kiểm tra giỏ hàng tồn tại
+        const userCart = await cart.findOne({ 
             cart_userId: userId,
-            'cart_products.productId': productId,
             cart_status: 'active'
-        }, updateSet = {
-            $inc: {
-                'cart_products.$.quantity': quantity
-            }
-        }, options = { upsert: true, new: true }
+        });
+        
+        if (!userCart) {
+            return await CartService.createUserCart({ userId, product });
+        }
 
-        return await cart.findOneAndUpdate(query, updateSet, options)
+        // Kiểm tra sản phẩm đã có trong giỏ chưa
+        const productExists = userCart.cart_products.some(p => p.productId === productId);
+        
+        if (productExists) {
+            // Cập nhật số lượng nếu sản phẩm đã tồn tại
+            return await cart.findOneAndUpdate(
+                { 
+                    cart_userId: userId,
+                    'cart_products.productId': productId,
+                    cart_status: 'active'
+                },
+                { $inc: { 'cart_products.$.quantity': quantity } },
+                { new: true }
+            );
+        } else {
+            // Thêm sản phẩm mới nếu chưa tồn tại
+            return await cart.findOneAndUpdate(
+                { 
+                    cart_userId: userId,
+                    cart_status: 'active'
+                },
+                { $addToSet: { cart_products: product } },
+                { new: true }
+            );
+        }
     }
     
     /* END REPO CART */
 
-    static async addToCart({userId, product = {} }) {
-        const userCart = await cart.findOne({
-            cart_userId: userId
-        })
-
-        if (!userCart) {
-            return await CartService.createUserCart({ userId, product })
+    static async addToCart({ userId, product = {} }) {
+        // Kiểm tra sản phẩm hợp lệ
+        if (!product.productId || !product.shopId) {
+            throw new BadRequestError('Invalid product data');
         }
 
-        // If user cart exists but product not in cart => add product to cart
-        if (!userCart.cart_products.length) {
-            userCart.cart_products = [product]
-            return await userCart.save()
+        const foundProduct = await getProductById(product.productId);
+        if (!foundProduct) throw new NotFoundError("Product not found");
+        if (foundProduct.product_shop.toString() !== product.shopId) {
+            throw new BadRequestError("Product does not belong to the shop");
         }
 
-        // If product already in cart => update quantity
-        return await CartService.updateUserCartQuantity({ userId, product })
+        return await CartService.updateUserCartQuantity({ userId, product });
     }
 
     static async addToCartV2({userId, shop_order_ids = {} }) {
