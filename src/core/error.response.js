@@ -54,10 +54,19 @@ class ForBiddenError extends ErrorResponse {
     }
 }
 
+//Redis Error
+class RedisErrorResponse extends ErrorResponse {
+    constructor( message = ReasonPhrases.INTERNAL_SERVER_ERROR, statusCode = StatusCodes.INTERNAL_SERVER_ERROR) {
+        super(message, statusCode)
+    }
+}
+
+
 module.exports = {
     ConlictRequestError,
     BadRequestError,
     AuthFailureError,
     NotFoundError,
-    ForBiddenError
+    ForBiddenError,
+    RedisErrorResponse
 }
