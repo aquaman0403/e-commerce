@@ -63,8 +63,21 @@ const initRedis = () => {
 
 const getRedis = () => client
 
-const closeRedis = () => {
-
+const closeRedis = async () => {
+    try {
+        if (client.instanceConnect) {
+            await client.instanceConnect.quit()
+            console.log('connectionRedis - Connection closed successfully')
+            client.instanceConnect = null
+            clearTimeout(connectionTimeout)
+        }
+    } catch (err) {
+        console.error(`connectionRedis - Error closing connection: ${err}`)
+        throw new RedisErrorResponse({
+            message: 'Redis closing connection error',
+            statusCode: -98
+        })
+    }
 }
 
 module.exports = {
