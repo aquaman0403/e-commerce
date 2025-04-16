@@ -33,18 +33,18 @@ const createTokenPair = async (payload, publicKey, privateKey) => {
     });
 
     return { accessToken, refreshToken };
-  } catch (error) {}
+  } catch (error) { }
 };
 
 const authentication = asyncHandler(async (req, res, next) => {
   /*
-        1 - Check userId missing?
-        2 - Get accessToken
-        3 - Verify
-        4 - Check user in db
-        5 - Check keyStore with userId
-        6 - Return next()
-     */
+    1 - Check userId missing?
+    2 - Get accessToken
+    3 - Verify
+    4 - Check user in db
+    5 - Check keyStore with userId
+    6 - Return next()
+  */
 
   const userId = req.headers[HEADER.CLIENT_ID];
   if (!userId) throw new AuthFailureError("Invalid request");
@@ -58,7 +58,7 @@ const authentication = asyncHandler(async (req, res, next) => {
   try {
     const decodeUser = JWT.verify(accessToken, keyStore.publicKey);
     if (userId !== decodeUser.userId) {
-        throw new AuthFailureError("Invalid user");
+      throw new AuthFailureError("Invalid user");
     }
     req.keyStore = keyStore;
     return next();
@@ -69,13 +69,13 @@ const authentication = asyncHandler(async (req, res, next) => {
 
 const authenticationV2 = asyncHandler(async (req, res, next) => {
   /*
-        1 - Check userId missing?
-        2 - Get accessToken
-        3 - Verify
-        4 - Check user in db
-        5 - Check keyStore with userId
-        6 - Return next()
-     */
+    1 - Check userId missing?
+    2 - Get accessToken
+    3 - Verify
+    4 - Check user in db
+    5 - Check keyStore with userId
+    6 - Return next()
+  */
 
   const userId = req.headers[HEADER.CLIENT_ID];
   if (!userId) throw new AuthFailureError("Invalid request");
@@ -105,7 +105,7 @@ const authenticationV2 = asyncHandler(async (req, res, next) => {
   try {
     const decodeUser = JWT.verify(accessToken, keyStore.publicKey);
     if (userId !== decodeUser.userId) {
-        throw new AuthFailureError("Invalid user");
+      throw new AuthFailureError("Invalid user");
     }
     req.keyStore = keyStore;
     req.user = decodeUser;
